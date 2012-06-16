@@ -1,0 +1,109 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>WordCram by danbernier</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>WordCram</h1>
+        <p>generate word clouds in Processing</p>
+        <p class="view"><a href="https://github.com/danbernier/WordCram">View the Project on GitHub <small>danbernier/WordCram</small></a></p>
+        <ul>
+          <li><a href="https://github.com/danbernier/WordCram/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/danbernier/WordCram/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/danbernier/WordCram">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <p>WordCram lets you generate <a href="http://images.google.com/images?q=word+cloud">word
+clouds</a> in Processing.
+It does the heavy lifting -- text analysis, collision detection -- for
+you, so you can focus on making your word clouds as beautiful, as
+revealing, or as silly as you like.</p>
+
+<p><img src="https://github.com/danbernier/WordCram/raw/master/wordcram.png" alt="Word Cloud by
+WordCram"></p>
+
+<h2>Make a Word Cloud</h2>
+
+<div class="highlight">
+<pre><span class="kn">import</span> <span class="nn">wordcram.*</span><span class="o">;</span>
+
+<span class="c1">// Set up the Processing sketch</span>
+<span class="n">size</span><span class="o">(</span><span class="mi">1000</span><span class="o">,</span> <span class="mi">600</span><span class="o">);</span>
+<span class="n">colorMode</span><span class="o">(</span><span class="n">HSB</span><span class="o">);</span>
+<span class="n">background</span><span class="o">(</span><span class="mi">230</span><span class="o">);</span>
+
+<span class="c1">// Make a wordcram from a random wikipedia page.</span>
+<span class="k">new</span> <span class="nf">WordCram</span><span class="o">(</span><span class="k">this</span><span class="o">)</span>
+  <span class="o">.</span><span class="na">fromWebPage</span><span class="o">(</span><span class="s">"http://en.wikipedia.org/wiki/Special:Random"</span><span class="o">)</span>
+  <span class="o">.</span><span class="na">withColors</span><span class="o">(</span><span class="n">color</span><span class="o">(</span><span class="mi">30</span><span class="o">),</span> <span class="n">color</span><span class="o">(</span><span class="mi">110</span><span class="o">),</span>
+              <span class="n">color</span><span class="o">(</span><span class="n">random</span><span class="o">(</span><span class="mi">255</span><span class="o">),</span> <span class="mi">240</span><span class="o">,</span> <span class="mi">200</span><span class="o">))</span>
+  <span class="o">.</span><span class="na">sizedByWeight</span><span class="o">(</span><span class="mi">5</span><span class="o">,</span> <span class="mi">120</span><span class="o">)</span>
+  <span class="o">.</span><span class="na">withFont</span><span class="o">(</span><span class="s">"Copse"</span><span class="o">)</span>
+  <span class="o">.</span><span class="na">drawAll</span><span class="o">();</span>
+</pre>
+</div>
+
+
+<p>You can control where words appear, what angle they're at, their font,
+their color, and how they're sized.</p>
+
+<h2>Install</h2>
+
+<p><a href="https://github.com/danbernier/WordCram/wiki/Install">Installing</a>
+WordCram is simple, like any standard Processing library.</p>
+
+<h2>How do I use this thing? Show me examples!</h2>
+
+<p>More of these are coming to the wiki, soon!</p>
+
+<p>But you can check out the
+<a href="http://wordcram.org/category/tutorial/">tutorials</a> and
+<a href="http://wordcram.org/category/examples/">examples</a> at
+<a href="http://wordcram.org">http://wordcram.org</a>. You can watch WordCram in action, on
+OpenProcessing: <a href="http://openprocessing.org/visuals/?visualID=12562">popular baby
+names</a>, and <a href="http://openprocessing.org/visuals/?visualID=12413">the
+U.S. Constitution</a>.</p>
+
+<p>And if you add WordCram to Processing, you can see a bunch of examples
+under File &gt; Examples &gt; Contributed Libraries &gt; WordCram.</p>
+
+<h2>Problems?</h2>
+
+<p>If you're running into problems, see the
+<a href="https://github.com/danbernier/WordCram/wiki/FAQ">FAQ</a>, or read the
+<a href="http://wordcram.googlecode.com/svn/javadoc/index.html">javadocs</a>.</p>
+
+<p>If a question has you stumped, and the
+<a href="https://github.com/danbernier/WordCram/wiki/FAQ">FAQ</a> is no help,
+send me a note. My email account is 'wordcram', and I use gmail.</p>
+
+<h2>Want a better WordCram?</h2>
+
+<p>WordCram is open-source under the Apache 2 license. That means you can
+help make it better! I try to keep the source clean so it's easy to
+find your way around. There's a <a href="https://github.com/danbernier/WordCram/wiki/ToDos">laundry list of things to
+do</a>, and it's easy to
+<a href="https://github.com/danbernier/WordCram/wiki/Build">build WordCram from
+source</a>.</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/danbernier">danbernier</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
