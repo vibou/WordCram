@@ -1,0 +1,9 @@
+.DS_Store
+bin
+build
+build.json
+ideExample
+example
+lib
+target
+test
