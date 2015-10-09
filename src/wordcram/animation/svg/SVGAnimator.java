@@ -17,59 +17,69 @@ import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 
 import wordcram.animation.IAnimator;
+import wordcram.animation.svg.KeyFrame.AnimationType;
 
 public class SVGAnimator implements IAnimator {
 
-	private static FilenameFilter filter = new FilenameFilter() {
+	private static FilenameFilter			filter				= new FilenameFilter() {
 
-		@Override
-		public boolean accept(File arg0, String arg1) {
-			return arg1.endsWith("svg");
-		}
+																	@Override
+																	public boolean accept(
+																			final File arg0,
+																			final String arg1) {
+																		return arg1.endsWith("svg");
+																	}
 
-	};
+																};
 
-	private List<File> files = new ArrayList<File>();
+	private final List<File>				files				= new ArrayList<File>();
 
-	private float transition = 4f;
-	private float waitingTime = 2f;
+	private float							transition			= 4f;
+	private float							timeBetweenKeyFrame	= 2f;
 
-	private HashMap<String, List<WordInfo>> wordInfoMap;
+	private HashMap<String, List<WordInfo>>	wordInfoMap;
 
-	private HashMap<String, String> pathMap;
+	private HashMap<String, String>			pathMap;
 
-	private XMLContentHandler handler;
+	private XMLContentHandler				handler;
+
+	private boolean							loop;
+
+	private boolean							waitingBeforeLoop;
 
 	public SVGAnimator() {
 
 	}
 
 	@Override
-	public IAnimator setTransition(float f) {
+	public IAnimator setTransition(final float f) {
 		this.transition = (f <= 0) ? 0.5f : f;
-		return this;
-	}
-	
-	@Override
-	public IAnimator setDelayBetweenFiles(float seconds) {
-		this.waitingTime = (seconds < 0) ? 0 : seconds;
 		return this;
 	}
 
 	@Override
-	public IAnimator addFile(File file) throws IOException {
+	public IAnimator setDelayBetweenFiles(final float seconds) {
+		this.timeBetweenKeyFrame = (seconds < 0) ? 0 : seconds;
+		return this;
+	}
+
+	@Override
+	public IAnimator addFile(final File file) throws IOException {
 		files.add(file);
 		return this;
 	}
 
 	@Override
-	public IAnimator addFolder(File folder) throws IOException {
+	public IAnimator addFolder(final File folder) throws IOException {
 		if (folder == null || !folder.exists() || !folder.isDirectory())
-			throw new IOException("The folder " + ((folder == null) ? "null" : folder.getAbsolutePath()) + " does not exist or is not a directory");
+			throw new IOException("The folder "
+					+ ((folder == null) ? "null" : folder.getAbsolutePath())
+					+ " does not exist or is not a directory");
 
-		for (File f : folder.listFiles()) {
-			if (!filter.accept(f.getParentFile(), f.getName()))
+		for (final File f : folder.listFiles()) {
+			if (!filter.accept(f.getParentFile(), f.getName())) {
 				continue;
+			}
 
 			files.add(f);
 		}
@@ -77,147 +87,161 @@ public class SVGAnimator implements IAnimator {
 	}
 
 	@Override
-	public void toFile(File svgFile) throws IOException {
-		
-		Document doc = DocumentHelper.createDocument();
-		doc.addDocType("svg", "-//W3C//DTD SVG 1.0//EN", "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd");
+	public void toFile(final File svgFile) throws IOException {
 
-		Element root = doc.addElement("svg");
+		final Document doc = DocumentHelper.createDocument();
+		doc.addDocType("svg", "-//W3C//DTD SVG 1.0//EN",
+				"http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd");
+
+		final Element root = doc.addElement("svg");
 		root.addNamespace("", "http://www.w3.org/2000/svg");
 		root.addNamespace("xlink", "http://www.w3.org/1999/xlink");
-		
-		
+
 		readFiles();
-		
 
 		wordInfoMap = handler.getWordInfoMap();
 		pathMap = handler.getPathMap();
-		
-		BufferedWriter writer = new BufferedWriter(new FileWriter(svgFile));
-		float opacityTransition = 0.5f;
-		for (String word : wordInfoMap.keySet()) {
-			List<WordInfo> infos = wordInfoMap.get(word);
-			String pathStr = pathMap.get(word);
-			Element path = null;
-			Element group = null;
-			Element transformation;
-			int wordInfoIdx = 0;
-			WordInfo previous = null;
-			for (WordInfo info : infos) {
 
-				if (group == null) {
-					group =  root.addElement("g",  "http://www.w3.org/2000/svg");
-					info.attachTo(group);
-					path = group.addElement("path");
-					path.addAttribute("d", pathStr);
-					previous = info;
+		final BufferedWriter writer = new BufferedWriter(new FileWriter(svgFile));
+
+		for (final String word : wordInfoMap.keySet()) {
+
+			// if (!(word.equals("Wakefern") || word.equals("O"))) {
+			// continue;
+			// }
+
+			final List<WordInfo> infos = wordInfoMap.get(word);
+
+			if (infos.isEmpty()) {
+				continue;
+			}
+
+			final String pathStr = pathMap.get(word);
+
+			final Element group = root.addElement("g", "http://www.w3.org/2000/svg");
+			group.addAttribute("id", word);
+			final Element path = group.addElement("path");
+			path.addAttribute("d", pathStr);
+
+			final Animation a = new Animation(word, group, transition, timeBetweenKeyFrame);
+
+			WordInfo previousInfo = null;
+
+			for (final WordInfo info : infos) {
+
+				if (previousInfo == null) {
+					previousInfo = info;
+					path.addAttribute("fill", previousInfo.getStyleAsString("fill"));
+					path.addAttribute("opacity", previousInfo.getOpacity() + "");
+
+					final KeyFrame frame = new KeyFrame(previousInfo.getPath());
+					a.addKeyFrame(frame);
+					frame.addTransition(AnimationType.SHAPE, AttributeStream.open("opacity")
+						.add("to", previousInfo.getOpacity())
+						.close());
+
+					frame.addTransition(AnimationType.COLOR, AttributeStream.open("fill")
+						.add("to", previousInfo.getStyleAsString("fill"))
+						.close());
+
 					continue;
 				}
 
-				float begin = (wordInfoIdx * (this.transition+this.waitingTime)) + this.waitingTime;
-				
+				final KeyFrame frame = new KeyFrame(info.getPath());
+				a.addKeyFrame(frame);
 
-				//Add Special Animation so that every words that need to be masked from the
-				//first animation are masked;
-				if(wordInfoIdx == 0)
-				{
-					transformation = doAnimate(path, "opacity", 0, 0);
-					transformation.addAttribute("from", previous.getOpacity() + "");
-					transformation.addAttribute("to", previous.getOpacity() + "");
-				}
-				
-				if (previous.getOpacity() != info.getOpacity()) {
+				frame.addTransition(AnimationType.SHAPE, AttributeStream.open("opacity")
+					.add("from", previousInfo.getOpacity())
+					.add("to", info.getOpacity())
+					.close());
 
-					transformation = doAnimate(path, "opacity", begin, opacityTransition);
-					
-					transformation.addAttribute("from", previous.getOpacity() + "");
-					transformation.addAttribute("to", info.getOpacity() + "");
+				if (!previousInfo.getPath()
+					.equals(info.getPath())) {
+
+					frame.addTransition(AnimationType.SHAPE, AttributeStream.open("d")
+						.add("to", info.getPath())
+						.close());
 				}
 
-				if (!previous.getPath().equals(info.getPath())) {
-					transformation = doAnimate(path, "d", begin, transition);
-					transformation.addAttribute("to", info.getPath());
+				if (!previousInfo.getStyleAsString("fill")
+					.equals(info.getStyleAsString("fill"))) {
+
+					frame.addTransition(AnimationType.COLOR, AttributeStream.open("fill")
+						.add("from", previousInfo.getStyleAsString("fill"))
+						.add("to", info.getStyleAsString("fill"))
+						.close());
 				}
 
-				if (!previous.getStyleAsString("fill").equals(info.getStyleAsString("fill"))) {
-					transformation = doAnimateColor(path, "fill", begin, transition);
-					transformation.addAttribute("to", info.getStyleAsString("fill"));
-				}
-
-				
-
-				previous = info;
-				wordInfoIdx++;
-
+				previousInfo = info;
 			}
+
+			a.setTransition(transition);
+			a.setTimeBetweenKeyFrame(timeBetweenKeyFrame);
+			a.setLoop(loop);
+
+			a.compile();
 		}
 
-		writer.write("<"+doc.asXML().substring(1).replaceAll("<", "\n<"));
+		writer.write("<" + doc.asXML()
+			.substring(1)
+			.replaceAll("<", "\n<"));
 		writer.close();
 	}
 
-
-	/**
-	 * @param path
-	 * @param begin
-	 * @return
-	 */
-	private Element doAnimate(Element path, String attributeName, float begin, float duration) {
-		Element transformation;
-		transformation = path.addElement("animate");
-		transformation.addAttribute("begin", begin + "s");
-		if(duration > 0)
-			transformation.addAttribute("dur", duration + "s");
-		else
-			transformation.addAttribute("dur", "0.01s");
-		
-		transformation.addAttribute("attributeName", attributeName);
-		transformation.addAttribute("fill", "freeze");
-
-		return transformation;
+	private void readFiles() {
+		try {
+			_readFiles();
+		} catch (final Exception e) {
+			e.printStackTrace();
+		}
 	}
 
-	/**
-	 * @param path
-	 * @param begin
-	 * @return
-	 */
-	private Element doAnimateColor(Element path, String attributeName, float begin, float duration) {
-		Element transformation;
-		transformation = path.addElement("animateColor");
-		transformation.addAttribute("begin", begin + "s");
-		transformation.addAttribute("dur", duration + "s");
-		transformation.addAttribute("attributeName", attributeName);
-		transformation.addAttribute("fill", "freeze");
+	private void _readFiles() throws Exception {
 
-		return transformation;
-	}
-
-	private void readFiles()  {
-
-		SAXParserFactory factory = SAXParserFactory.newInstance();
+		final SAXParserFactory factory = SAXParserFactory.newInstance();
 		factory.setNamespaceAware(false);
+		factory.setValidating(false);
+		factory.setFeature("http://xml.org/sax/features/namespaces", false);
+		factory.setFeature("http://xml.org/sax/features/validation", false);
+		factory.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false);
+		factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+
 		SAXParser parser = null;
-		
+
 		try {
 			parser = factory.newSAXParser();
-		}
-		catch (Exception e1) {
+		} catch (final Exception e1) {
 			e1.printStackTrace();
 			return;
 		}
-		
+
 		handler = new XMLContentHandler();
 
-		for (File f : files) {
+		for (final File f : files) {
 			try {
 				parser.parse(f, handler);
-			}
-			catch (Exception e) {
+			} catch (final Exception e) {
 				e.printStackTrace();
 			}
 		}
 
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see wordcram.animation.IAnimator#setLoop(boolean)
+	 */
+	@Override
+	public IAnimator setLoop(final boolean bool) {
+		this.loop = bool;
+		return this;
+	}
+
+	@Override
+	public IAnimator setWaitingBeforeLoop(final boolean bool) {
+		this.waitingBeforeLoop = bool;
+		return this;
 	}
 
 }

@@ -76,6 +76,7 @@ public class Word implements Comparable<Word> {
     private WordSkipReason skippedBecause;
 
     private HashMap<String,Object> properties = new HashMap<String,Object>();
+	private double opacity;
 
     public Word(String word, float weight) {
         this.word = word;
@@ -116,6 +117,24 @@ public class Word implements Comparable<Word> {
     public Word setColor(int color) {
         this.presetColor = color;
         return this;
+    }
+    
+    /**
+     * Set the opacity this Word should be rendered in - WordCram won't call the WordColorer.
+     * @return the Word, for more configuration
+     */
+    public Word setOpacity(double opacity) {
+        this.opacity = opacity;
+        return this;
+    }
+    
+    /**
+     * Get the opacity value from 0 to 1
+     * @return the opacity value;
+     */
+    public double getOpacity()
+    {
+    	return opacity;
     }
 
     /**

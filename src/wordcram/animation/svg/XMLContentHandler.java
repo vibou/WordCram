@@ -11,133 +11,118 @@ import org.xml.sax.helpers.DefaultHandler;
 
 public class XMLContentHandler extends DefaultHandler {
 
-	private int fileIdx = 0;
-	
-	private HashMap<String, List<WordInfo>> wordInfoMap = new HashMap<String, List<WordInfo>>();
-	private HashMap<String, String> pathMap = new HashMap<String, String>();
-	
-	private String lastId = "";
-	private List<WordInfo> lastInfos ;
+	private int										fileIdx		= 0;
 
-	private long startDocument;
+	private final HashMap<String, List<WordInfo>>	wordInfoMap	= new HashMap<String, List<WordInfo>>();
+	private final HashMap<String, String>			pathMap		= new HashMap<String, String>();
 
+	private String									lastId		= "";
+	private List<WordInfo>							lastInfos;
 
-	
 	@Override
-	public void characters(char[] ch, int start, int length) throws SAXException {
-		
+	public void characters(final char[] ch, final int start, final int length) throws SAXException {
+
 	}
 
 	@Override
 	public void endDocument() throws SAXException {
-		System.err.println("end...");
-		for(String word : wordInfoMap.keySet())
-		{
-			List<WordInfo> infos = wordInfoMap.get(word);
-			WordInfo info = infos.get(infos.size() - 1);
-			while(infos.size() < (fileIdx))
-			{
-				WordInfo clone = info.copy();
+
+		for (final String word : wordInfoMap.keySet()) {
+			final List<WordInfo> infos = wordInfoMap.get(word);
+			final WordInfo info = infos.get(infos.size() - 1);
+			while (infos.size() < fileIdx) {
+				final WordInfo clone = info.copy();
 				clone.setOpacity(0);
 				infos.add(clone);
 				lastInfos.add(clone);
 			}
 		}
-		
-		System.err.println((System.currentTimeMillis() - startDocument)+"ms");
-		
+
 	}
 
 	@Override
-	public void endElement(String uri, String localName, String qName) throws SAXException {
-		
+	public void endElement(final String uri, final String localName, final String qName)
+			throws SAXException {
+
 	}
 
 	@Override
-	public void endPrefixMapping(String prefix) throws SAXException {
-		
+	public void endPrefixMapping(final String prefix) throws SAXException {
+
 	}
 
 	@Override
-	public void ignorableWhitespace(char[] ch, int start, int length) throws SAXException {
-		
+	public void ignorableWhitespace(final char[] ch, final int start, final int length)
+			throws SAXException {
+
 	}
 
 	@Override
-	public void processingInstruction(String target, String data) throws SAXException {
-		
+	public void processingInstruction(final String target, final String data) throws SAXException {
+
 	}
 
 	@Override
-	public void setDocumentLocator(Locator locator) {
-		
+	public void setDocumentLocator(final Locator locator) {
+
 	}
 
 	@Override
-	public void skippedEntity(String name) throws SAXException {
-		
+	public void skippedEntity(final String name) throws SAXException {
+
 	}
 
 	@Override
 	public void startDocument() throws SAXException {
 		fileIdx++;
-		startDocument = System.currentTimeMillis();
 		lastId = "";
-		if(lastInfos == null)
+		if (lastInfos == null) {
 			lastInfos = new ArrayList<WordInfo>();
-		else
+		} else {
 			lastInfos.clear();
-		
+		}
+
 	}
 
 	@Override
-	public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
-		
-		if(qName == "g")
-		{
+	public void startElement(final String uri, final String localName, final String qName,
+			final Attributes atts) throws SAXException {
+
+		if (qName == "g") {
 			lastId = atts.getValue("id");
-			List<WordInfo> infos = wordInfoMap.get(lastId);
-			
-			if(infos == null)
-			{
-				infos = new ArrayList<WordInfo>();
-				wordInfoMap.put(lastId, infos);
-			}
-			
-			WordInfo info = new WordInfo(lastId);
+			final List<WordInfo> infos = wordInfoMap.computeIfAbsent(lastId,
+					id -> new ArrayList<WordInfo>());
+
+			final WordInfo info = new WordInfo(lastId);
 			info.addStyle(atts);
-			while(infos.size() < (fileIdx - 1))
-			{
-				WordInfo clone = info.copy();
+
+			while (infos.size() < (fileIdx - 1)) {
+				final WordInfo clone = info.copy();
 				clone.setOpacity(0);
 				infos.add(clone);
 				lastInfos.add(clone);
 			}
-			
+
 			lastInfos.add(info);
 			infos.add(info);
-		}
-		else if(qName == "path")
-		{
-			String path = atts.getValue("d");
-			if(!pathMap.containsKey(lastId))
-			{
+		} else if (qName == "path") {
+			final String path = atts.getValue("d");
+			if (!pathMap.containsKey(lastId)) {
 				pathMap.put(lastId, path);
 			}
-			
-			for(WordInfo info : lastInfos)
-			{
+
+			for (final WordInfo info : lastInfos) {
 				info.setPath(path);
 			}
-			
+
 			lastInfos.clear();
 		}
-		
+
 	}
 
 	@Override
-	public void startPrefixMapping(String prefix, String uri) throws SAXException {
-		
+	public void startPrefixMapping(final String prefix, final String uri) throws SAXException {
+
 	}
 
 	public final HashMap<String, List<WordInfo>> getWordInfoMap() {

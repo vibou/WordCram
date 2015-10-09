@@ -27,6 +27,11 @@ class EngineWord {
         this.shape = shape;
         this.bbTree = bbTreeBuilder.makeTree(shape, swelling);
     }
+    
+    String getOpacity()
+    {
+    	return String.format("%.2f", word.getOpacity());
+    }
 
     Shape getShape() {
         return shape;
