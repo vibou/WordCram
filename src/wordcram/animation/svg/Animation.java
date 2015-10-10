@@ -31,6 +31,7 @@ public class Animation {
 
 	private float					latency				= 0;
 	private float					totalTime			= 0;
+	private final boolean			isDebug				= false;
 
 	protected Animation(final String idPrefix, final Element group, final float transition,
 			final float timeBetweenKeyFrame) {
@@ -162,9 +163,8 @@ public class Animation {
 
 			pathElement.addAttribute("attributeName", element.attributeValue("attributeName"));
 
-			System.err.println("[ANIM.: " + id + " " + element.attributeValue("attributeName")
-					+ "] dur: " + duration + "s; trigger:" + trigger + "; from: " + from + "; to: "
-					+ to);
+			debug("[ANIM.: " + id + " " + element.attributeValue("attributeName") + "] dur: "
+					+ duration + "s; trigger:" + trigger + "; from: " + from + "; to: " + to);
 		}
 
 		if (resultingElements.isEmpty())
@@ -174,7 +174,7 @@ public class Animation {
 
 		if (duration < transition) {
 			addLatency(transition - duration);
-			System.err.println("[INTER-FRAME " + latency + "s]");
+			debug("[INTER-FRAME " + latency + "s]");
 
 			duration += transition - duration;
 		}
@@ -186,12 +186,12 @@ public class Animation {
 			addToPathAnimation(this.path);
 		}
 
-		System.err.println("[TOTAL TIME: " + totalTime + " ]");
+		debug("[TOTAL TIME: " + totalTime + " ]");
 		return resultingElements;
 	}
 
 	private void addToPathAnimation(final String path) {
-		System.err.println("[PATH ADD VALUE at time " + totalTime + "s ]");
+		debug("[PATH ADD VALUE at time " + totalTime + "s ]");
 		this.pathKeyValues.add(new String[] { String.format(Locale.ENGLISH, "%.1f", totalTime),
 				path });
 	}
@@ -211,7 +211,7 @@ public class Animation {
 		final Element path = group.element("path");
 		this.mainPathElement = path.addElement(AnimationType.SHAPE.nodeName());
 
-		System.err.println("Set path values");
+		debug("Set path values");
 		final StringBuilder keys = new StringBuilder();
 		final StringBuilder values = new StringBuilder();
 
@@ -247,7 +247,7 @@ public class Animation {
 			mainPathElement.addAttribute("repeatCount", "indefinite");
 		}
 
-		System.err.println("Number of path-values: " + pathKeyValues.size());
+		debug("Number of path-values: " + pathKeyValues.size());
 	}
 
 	public String getIdPrefix() {
@@ -326,18 +326,18 @@ public class Animation {
 			opacity = "1";
 		}
 
-		System.err.println("[ADD FIRST PATH]");
+		debug("[ADD FIRST PATH]");
 		addToPathAnimation(path.attributeValue("d"));
 
 		if (timeBetweenKeyFrame > 0) {
 
-			System.err.println("[ADD FIRST LATENCY]");
+			debug("[ADD FIRST LATENCY]");
 			addLatency(timeBetweenKeyFrame);
 			// addToPathAnimation(path.attributeValue("d"));
 			// resetLatency();
 			// addToPathAnimation(path.attributeValue("d"));
 
-			System.err.println("[TOTAL TIME: " + latency + "s ]");
+			debug("[TOTAL TIME: " + latency + "s ]");
 		}
 
 		if (this.loop) {
@@ -345,8 +345,8 @@ public class Animation {
 		}
 
 		for (final KeyFrame frame : frames) {
-			System.err.println("---------------------");
-			System.err.println("FRAME " + frameNum);
+			debug("---------------------");
+			debug("FRAME " + frameNum);
 
 			final List<Element> resultingElements = handleFrameElements(path, frame, frameNum);
 
@@ -377,8 +377,8 @@ public class Animation {
 
 			pathElement.addAttribute("attributeName", "opacity");
 
-			System.err.println("[EXTRA-ANIM.: " + id + " ] dur: " + duration + "s; trigger:"
-					+ trigger + "; from: " + opacity + "; to: " + opacity);
+			debug("[EXTRA-ANIM.: " + id + " ] dur: " + duration + "s; trigger:" + trigger
+					+ "; from: " + opacity + "; to: " + opacity);
 
 		}
 
@@ -391,10 +391,16 @@ public class Animation {
 			begin += ";" + buildTrigger(currentId());
 		}
 
-		System.err.println("Set Begin to first frame: " + begin);
+		debug("Set Begin to first frame: " + begin);
 		for (final Element initElement : initElements) {
 			initElement.addAttribute("begin", begin);
 			// initElement.addAttribute("dur", "1ms");
+		}
+	}
+
+	private void debug(final String string) {
+		if (isDebug) {
+			System.err.println(string);
 		}
 	}
 }

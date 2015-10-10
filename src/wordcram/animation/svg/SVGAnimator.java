@@ -104,10 +104,6 @@ public class SVGAnimator implements IAnimator {
 
 		for (final String word : wordInfoMap.keySet()) {
 
-			// if (!(word.equals("Wakefern") || word.equals("O"))) {
-			// continue;
-			// }
-
 			final List<WordInfo> infos = wordInfoMap.get(word);
 
 			if (infos.isEmpty()) {
@@ -206,7 +202,7 @@ public class SVGAnimator implements IAnimator {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see wordcram.animation.IAnimator#setLoop(boolean)
 	 */
 	@Override
