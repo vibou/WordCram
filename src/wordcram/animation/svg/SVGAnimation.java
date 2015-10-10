@@ -31,7 +31,7 @@ public class SVGAnimation {
 
 	private float					latency				= 0;
 	private float					totalTime			= 0;
-	private final boolean			isDebug				= true;
+	private final boolean			isDebug				= false;
 
 	protected SVGAnimation(final String idPrefix, final Element group) {
 		super();
