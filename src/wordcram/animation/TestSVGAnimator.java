@@ -19,8 +19,8 @@ public class TestSVGAnimator {
 		try {
 			animator.addFolder(folder)
 				.setTransition(2f)
-				.setDelayBetweenFiles(1f)
-				.setLoop(true)
+				.setDelayBetweenFiles(0f)
+				.setLoop(false)
 				.toFile(new File("animatedSVG.svg"));
 		} catch (final Exception e) {
 			e.printStackTrace();

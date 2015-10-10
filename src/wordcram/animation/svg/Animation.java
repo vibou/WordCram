@@ -31,7 +31,7 @@ public class Animation {
 
 	private float					latency				= 0;
 	private float					totalTime			= 0;
-	private final boolean			isDebug				= false;
+	private final boolean			isDebug				= true;
 
 	protected Animation(final String idPrefix, final Element group, final float transition,
 			final float timeBetweenKeyFrame) {
@@ -329,6 +329,10 @@ public class Animation {
 		debug("[ADD FIRST PATH]");
 		addToPathAnimation(path.attributeValue("d"));
 
+		if (this.loop) {
+			frames.add(frames.get(0));
+		}
+
 		if (timeBetweenKeyFrame > 0) {
 
 			debug("[ADD FIRST LATENCY]");
@@ -338,10 +342,8 @@ public class Animation {
 			// addToPathAnimation(path.attributeValue("d"));
 
 			debug("[TOTAL TIME: " + latency + "s ]");
-		}
-
-		if (this.loop) {
-			frames.add(frames.get(0));
+		} else {
+			frames.remove(0);
 		}
 
 		for (final KeyFrame frame : frames) {
