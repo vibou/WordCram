@@ -34,16 +34,17 @@ public class SVGAnimator implements IAnimator {
 
 	private final List<File>				files				= new ArrayList<File>();
 
-	private float							transition			= 4f;
-	private float							timeBetweenKeyFrame	= 2f;
+	private float							transition			= 0.5f;
+	private final float						opacityTransition	= 0.2f;
+	private final float						colorTransition		= 0.2f;
+	private float							timeBetweenKeyFrame	= 2.0f;
+	private boolean							loop				= false;
 
 	private HashMap<String, List<WordInfo>>	wordInfoMap;
 
 	private HashMap<String, String>			pathMap;
 
 	private XMLContentHandler				handler;
-
-	private boolean							loop;
 
 	public SVGAnimator() {
 
@@ -121,7 +122,7 @@ public class SVGAnimator implements IAnimator {
 			final Element path = group.addElement("path");
 			path.addAttribute("d", pathStr);
 
-			final Animation a = new Animation(word, group, transition, timeBetweenKeyFrame);
+			final SVGAnimation a = new SVGAnimation(word, group);
 
 			boolean isFirst = true;
 			KeyFrame firstFrame = null;
@@ -207,13 +208,29 @@ public class SVGAnimator implements IAnimator {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see wordcram.animation.IAnimator#setLoop(boolean)
 	 */
 	@Override
 	public IAnimator setLoop(final boolean bool) {
 		this.loop = bool;
 		return this;
+	}
+
+	public float getTransition() {
+		return transition;
+	}
+
+	public float getOpacityTransition() {
+		return opacityTransition;
+	}
+
+	public float getColorTransition() {
+		return colorTransition;
+	}
+
+	public boolean isLoop() {
+		return loop;
 	}
 
 }

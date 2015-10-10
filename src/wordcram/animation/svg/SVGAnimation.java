@@ -9,12 +9,12 @@ import org.dom4j.Element;
 
 import wordcram.animation.svg.KeyFrame.AnimationType;
 
-public class Animation {
+public class SVGAnimation {
 	final private Element			group;
-	private float					transition			= 1f;
-	private float					opacityTransition	= 0.5f;
-	private final float				colorTransition		= 0.5f;
-	private float					timeBetweenKeyFrame	= 0f;
+	private float					transition			= 0.5f;
+	private float					opacityTransition	= 0.2f;
+	private float					colorTransition		= 0.2f;
+	private float					timeBetweenKeyFrame	= 2.0f;
 	private boolean					loop;
 
 	private final List<KeyFrame>	frames;
@@ -33,13 +33,10 @@ public class Animation {
 	private float					totalTime			= 0;
 	private final boolean			isDebug				= true;
 
-	protected Animation(final String idPrefix, final Element group, final float transition,
-			final float timeBetweenKeyFrame) {
+	protected SVGAnimation(final String idPrefix, final Element group) {
 		super();
 		this.idPrefix = idPrefix;
 		this.group = group;
-		this.transition = transition;
-		this.timeBetweenKeyFrame = timeBetweenKeyFrame;
 		frames = new ArrayList<>();
 	}
 
@@ -72,7 +69,7 @@ public class Animation {
 	}
 
 	private List<Element> handleFrameElements(final Element path, final KeyFrame frame,
-			final int frameIdx) {
+			final int frameIdx, final boolean lastFrame) {
 
 		final List<Element> frameElements = frame.getAnimationsElement();
 
@@ -90,7 +87,11 @@ public class Animation {
 
 		final String trigger = buildTrigger(currentId());
 
-		final float frameDuration = transition + timeBetweenKeyFrame;
+		float frameDuration = timeBetweenKeyFrame + transition;
+
+		if (lastFrame) {
+			frameDuration = transition;
+		}
 
 		boolean newPositionAdded = false;
 		for (final Element element : frameElements) {
@@ -282,12 +283,12 @@ public class Animation {
 		this.loop = loop;
 	}
 
-	public Animation addKeyFrame(final KeyFrame frame) {
+	public SVGAnimation addKeyFrame(final KeyFrame frame) {
 		this.frames.add(frame);
 		return this;
 	}
 
-	public Animation addKeyFrame(final int index, final KeyFrame frame) {
+	public SVGAnimation addKeyFrame(final int index, final KeyFrame frame) {
 		this.frames.add(index, frame);
 		return this;
 	}
@@ -302,13 +303,14 @@ public class Animation {
 
 	public void compile() {
 
+		opacityTransition = Math.min(opacityTransition, transition);
+		colorTransition = Math.min(colorTransition, transition);
+
 		this.pathKeyValues = new ArrayList<>();
 
 		final List<Element> initElements = new ArrayList<>();
 
 		final boolean[] isFirstFrame = new boolean[] { true };
-
-		int frameNum = 1;
 
 		final Element path = group.element("path");
 
@@ -334,23 +336,23 @@ public class Animation {
 		}
 
 		if (timeBetweenKeyFrame > 0) {
-
 			debug("[ADD FIRST LATENCY]");
 			addLatency(timeBetweenKeyFrame);
-			// addToPathAnimation(path.attributeValue("d"));
-			// resetLatency();
-			// addToPathAnimation(path.attributeValue("d"));
 
 			debug("[TOTAL TIME: " + latency + "s ]");
 		} else {
 			frames.remove(0);
 		}
 
+		int frameNum = 1;
+		final int nbFrame = frames.size();
 		for (final KeyFrame frame : frames) {
 			debug("---------------------");
 			debug("FRAME " + frameNum);
 
-			final List<Element> resultingElements = handleFrameElements(path, frame, frameNum);
+			final boolean lastFrame = nbFrame == frameNum;
+			final List<Element> resultingElements = handleFrameElements(path, frame, frameNum,
+					lastFrame);
 
 			if (isFirstFrame[0]) {
 				initElements.addAll(resultingElements);
@@ -387,7 +389,11 @@ public class Animation {
 		initMainPathElement();
 
 		resetLatency();
-		addLatency(timeBetweenKeyFrame);
+		if (this.loop) {
+			addLatency(timeBetweenKeyFrame);
+		} else {
+			addLatency(timeBetweenKeyFrame);
+		}
 		String begin = String.format(Locale.ENGLISH, "%.1fs", timeBetweenKeyFrame);
 		if (this.loop) {
 			begin += ";" + buildTrigger(currentId());
