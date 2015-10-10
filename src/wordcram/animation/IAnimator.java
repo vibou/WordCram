@@ -14,15 +14,6 @@ public interface IAnimator {
 	public IAnimator setLoop(boolean bool);
 
 	/**
-	 * Whether transition to the next image after end of loop should be delayed
-	 * or not
-	 * 
-	 * @param bool
-	 * @return
-	 */
-	IAnimator setWaitingBeforeLoop(boolean bool);
-
-	/**
 	 * Set how long a motion from one file to another file takes
 	 *
 	 * @param seconds

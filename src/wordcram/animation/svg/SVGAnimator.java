@@ -45,8 +45,6 @@ public class SVGAnimator implements IAnimator {
 
 	private boolean							loop;
 
-	private boolean							waitingBeforeLoop;
-
 	public SVGAnimator() {
 
 	}
@@ -106,9 +104,9 @@ public class SVGAnimator implements IAnimator {
 
 		for (final String word : wordInfoMap.keySet()) {
 
-			// if (!(word.equals("Wakefern") || word.equals("O"))) {
-			// continue;
-			// }
+			if (!(word.equals("Wakefern"))) {
+				continue;
+			}
 
 			final List<WordInfo> infos = wordInfoMap.get(word);
 
@@ -125,54 +123,34 @@ public class SVGAnimator implements IAnimator {
 
 			final Animation a = new Animation(word, group, transition, timeBetweenKeyFrame);
 
-			WordInfo previousInfo = null;
-
+			boolean isFirst = true;
+			KeyFrame firstFrame = null;
 			for (final WordInfo info : infos) {
 
-				if (previousInfo == null) {
-					previousInfo = info;
-					path.addAttribute("fill", previousInfo.getStyleAsString("fill"));
-					path.addAttribute("opacity", previousInfo.getOpacity() + "");
-
-					final KeyFrame frame = new KeyFrame(previousInfo.getPath());
-					a.addKeyFrame(frame);
-					frame.addTransition(AnimationType.SHAPE, AttributeStream.open("opacity")
-						.add("to", previousInfo.getOpacity())
-						.close());
-
-					frame.addTransition(AnimationType.COLOR, AttributeStream.open("fill")
-						.add("to", previousInfo.getStyleAsString("fill"))
-						.close());
-
-					continue;
+				if (isFirst) {
+					path.addAttribute("fill", info.getStyleAsString("fill"));
+					path.addAttribute("opacity", Float.toString(info.getOpacity()));
+					isFirst = false;
 				}
 
 				final KeyFrame frame = new KeyFrame(info.getPath());
+				if (firstFrame == null) {
+					firstFrame = frame;
+				}
+
 				a.addKeyFrame(frame);
 
 				frame.addTransition(AnimationType.SHAPE, AttributeStream.open("opacity")
-					.add("from", previousInfo.getOpacity())
 					.add("to", info.getOpacity())
 					.close());
 
-				if (!previousInfo.getPath()
-					.equals(info.getPath())) {
+				frame.addTransition(AnimationType.SHAPE, AttributeStream.open("d")
+					.add("to", info.getPath())
+					.close());
 
-					frame.addTransition(AnimationType.SHAPE, AttributeStream.open("d")
-						.add("to", info.getPath())
-						.close());
-				}
-
-				if (!previousInfo.getStyleAsString("fill")
-					.equals(info.getStyleAsString("fill"))) {
-
-					frame.addTransition(AnimationType.COLOR, AttributeStream.open("fill")
-						.add("from", previousInfo.getStyleAsString("fill"))
-						.add("to", info.getStyleAsString("fill"))
-						.close());
-				}
-
-				previousInfo = info;
+				frame.addTransition(AnimationType.COLOR, AttributeStream.open("fill")
+					.add("to", info.getStyleAsString("fill"))
+					.close());
 			}
 
 			a.setTransition(transition);
@@ -224,7 +202,6 @@ public class SVGAnimator implements IAnimator {
 				e.printStackTrace();
 			}
 		}
-
 	}
 
 	/*
@@ -235,12 +212,6 @@ public class SVGAnimator implements IAnimator {
 	@Override
 	public IAnimator setLoop(final boolean bool) {
 		this.loop = bool;
-		return this;
-	}
-
-	@Override
-	public IAnimator setWaitingBeforeLoop(final boolean bool) {
-		this.waitingBeforeLoop = bool;
 		return this;
 	}
 
