@@ -361,11 +361,14 @@ public class Animation {
 
 		if (latency > 0) {
 			final Element pathElement = path.addElement(AnimationType.SHAPE.nodeName());
-			final float duration = (transition + timeBetweenKeyFrame) - latency;
+			final float duration = latency;
 			final String trigger = currentId();
 			final String id = nextId();
 			pathElement.addAttribute("id", id);
 			pathElement.addAttribute("class", "extra-frame");
+
+			resetLatency();
+
 			pathElement.addAttribute("begin", buildTrigger(trigger));
 			pathElement.addAttribute("dur", String.format(Locale.ENGLISH, "%.1fs", duration));
 			pathElement.addAttribute("fill", "freeze");
