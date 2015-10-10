@@ -144,9 +144,10 @@ public class Animation {
 				fill = element.attributeValue("to");
 			}
 
-			if ((frameIdx > 1 || timeBetweenKeyFrame == 0) && from.equals(to)) {
-				continue;
-			}
+			// if ((frameIdx > 1 || timeBetweenKeyFrame == 0) &&
+			// from.equals(to)) {
+			// continue;
+			// }
 
 			final String id = nextId();
 			final Element pathElement = path.addElement(element.getName());
