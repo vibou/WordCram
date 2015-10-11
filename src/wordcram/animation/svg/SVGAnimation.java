@@ -31,7 +31,14 @@ public class SVGAnimation {
 
 	private float					latency				= 0;
 	private float					totalTime			= 0;
-	private final boolean			isDebug				= true;
+	private static boolean			isDebug				= false;
+
+	static {
+		final String prop = System.getProperty("wordcram.animation.debug");
+		if (prop != null && !prop.isEmpty()) {
+			isDebug = Boolean.parseBoolean(prop);
+		}
+	}
 
 	protected SVGAnimation(final String idPrefix, final Element group) {
 		super();
