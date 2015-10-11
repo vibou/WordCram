@@ -11,9 +11,9 @@ import wordcram.animation.svg.KeyFrame.AnimationType;
 
 public class SVGAnimation {
 	final private Element			group;
-	private float					transition			= 0.5f;
-	private float					opacityTransition	= 0.2f;
-	private float					colorTransition		= 0.2f;
+	private float					transition			= 1f;
+	private float					opacityTransition	= 1f;
+	private float					colorTransition		= 1f;
 	private float					timeBetweenKeyFrame	= 2.0f;
 	private boolean					loop;
 
@@ -31,7 +31,7 @@ public class SVGAnimation {
 
 	private float					latency				= 0;
 	private float					totalTime			= 0;
-	private final boolean			isDebug				= false;
+	private final boolean			isDebug				= true;
 
 	protected SVGAnimation(final String idPrefix, final Element group) {
 		super();
@@ -332,6 +332,7 @@ public class SVGAnimation {
 		addToPathAnimation(path.attributeValue("d"));
 
 		if (this.loop) {
+			// To get back to initial state
 			frames.add(frames.get(0));
 		}
 
@@ -339,10 +340,15 @@ public class SVGAnimation {
 			debug("[ADD FIRST LATENCY]");
 			addLatency(timeBetweenKeyFrame);
 
+			if (this.loop) {
+				addToPathAnimation(path.attributeValue("d"));
+			}
+
 			debug("[TOTAL TIME: " + latency + "s ]");
-		} else {
-			frames.remove(0);
 		}
+
+		// is initial state
+		frames.remove(0);
 
 		int frameNum = 1;
 		final int nbFrame = frames.size();
@@ -410,5 +416,9 @@ public class SVGAnimation {
 		if (isDebug) {
 			System.err.println(string);
 		}
+	}
+
+	public void setColorTransition(final float colorTransition) {
+		this.colorTransition = colorTransition;
 	}
 }

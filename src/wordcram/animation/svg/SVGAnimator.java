@@ -34,10 +34,10 @@ public class SVGAnimator implements IAnimator {
 
 	private final List<File>				files				= new ArrayList<File>();
 
-	private float							transition			= 0.5f;
-	private final float						opacityTransition	= 0.2f;
-	private final float						colorTransition		= 0.2f;
-	private float							timeBetweenKeyFrame	= 2.0f;
+	private float							transition			= 1f;
+	private float							opacityTransition	= 1f;
+	private float							colorTransition		= 1f;
+	private float							timeBetweenKeyFrame	= 2f;
 	private boolean							loop				= false;
 
 	private HashMap<String, List<WordInfo>>	wordInfoMap;
@@ -152,6 +152,8 @@ public class SVGAnimator implements IAnimator {
 			}
 
 			a.setTransition(transition);
+			a.setOpacityTransition(opacityTransition);
+			a.setColorTransition(colorTransition);
 			a.setTimeBetweenKeyFrame(timeBetweenKeyFrame);
 			a.setLoop(loop);
 
@@ -227,6 +229,18 @@ public class SVGAnimator implements IAnimator {
 
 	public boolean isLoop() {
 		return loop;
+	}
+
+	public void setOpacityTransition(final float opacityTransition) {
+		this.opacityTransition = opacityTransition;
+	}
+
+	public void setColorTransition(final float colorTransition) {
+		this.colorTransition = colorTransition;
+	}
+
+	public void setTimeBetweenKeyFrame(final float timeBetweenKeyFrame) {
+		this.timeBetweenKeyFrame = timeBetweenKeyFrame;
 	}
 
 }
